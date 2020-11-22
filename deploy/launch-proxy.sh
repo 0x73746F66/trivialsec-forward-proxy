@@ -38,6 +38,8 @@ if [[ ${instanceId} == i-* ]]; then
     do
         sleep 2
     done
+    scp -o 'StrictHostKeyChecking no' -4 -J ec2-user@proxy.trivialsec.com ec2-user@${privateIp}:/var/log/user-data.log .
+    cat user-data.log
     if [[ ! -z "${existingInstanceId}" ]] && [[ ${existingInstanceId} == i-* ]]; then
         aws ec2 terminate-instances --instance-ids ${existingInstanceId}
     fi
