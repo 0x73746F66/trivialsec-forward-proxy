@@ -13,26 +13,22 @@ rpm --quiet -U ./amazon-cloudwatch-agent.rpm || true
 rm -f ./amazon-cloudwatch-agent.rpm
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c ssm:AmazonCloudWatch-trivialsec-proxy
 
-mkdir -p /etc/squid/ssl /etc/squid/old/
+systemctl enable squid
+systemctl start squid
+mkdir -p /etc/squid/ssl /tmp/squid_old
 cd /etc/squid/ssl
 openssl genrsa -out squid.key 4096
 openssl req -new -key squid.key -out squid.csr -subj "/C=XX/ST=XX/L=squid/O=squid/CN=squid"
 openssl x509 -req -days 3650 -in squid.csr -signkey squid.key -out squid.crt
 cat squid.key squid.crt >> squid.pem
-
-iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3129
-iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 3130
-
-cp /etc/squid/* /etc/squid/old/
+cp -Pfr /etc/squid/* /tmp/squid_old/
 aws s3 cp --only-show-errors s3://cloudformation-trivialsec/deploy-packages/allowed-sites.txt /etc/squid/allowed-sites.txt
 aws s3 cp --only-show-errors s3://cloudformation-trivialsec/deploy-packages/squid.conf /etc/squid/squid.conf
-squid -k parse && squid -k reconfigure || (cp /etc/squid/old/* /etc/squid/; exit 1)
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3129
+iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 3130
+squid -k parse && squid -k reconfigure || (cp -Pfr /tmp/squid_old/* /etc/squid/; exit 1)
 
 touch /etc/squid/passwd
 chown squid: /etc/squid/passwd
-
-systemctl enable squid
-systemctl start squid
 systemctl status squid
-
 echo $(date +'%F') > /home/ec2-user/.deployed
