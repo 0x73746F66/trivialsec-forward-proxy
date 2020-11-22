@@ -1,0 +1,50 @@
+before_script:
+  - echo 'COMMON_VERSION=0.1.4' > .env
+  - aws --version
+
+stages:
+  - upload
+  - deploy
+
+upload:
+  retry: 2
+  tags:
+    - python
+  stage: upload
+  variables:
+    COMMON_VERSION: 0.1.4
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  script:
+    - make upload
+  only:
+    refs:
+      - master
+      - merge_request
+
+deploy:
+  tags:
+    - python
+  stage: deploy
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+    HOSTED_ZONE_ID: 013378625S02DKVES691
+    EIP_ALLOCATION_ID: eipalloc-06df8c04f4ad62bfd
+    ROUTE53_JSON: route53-resource-record-set.json
+    DEFAULT_INSTANCE_TYPE: t2.micro
+    BASE_AMI: ami-0ded330691a314693
+    SUBNET_ID: subnet-8b05e8c3
+    SECURITY_GROUP_IDS: sg-0eb91604508f54628 sg-04a8dac724adcad3c
+    IAM_INSTANCE_PROFILE: EC2-TrivialSec
+    COST_CENTER: saas
+    PRIV_KEY_NAME: trivialsec-prod
+    TARGET_GROUP_ARN: arn:aws:elasticloadbalancing:ap-southeast-2:814504268053:targetgroup/trivialsec-prod-sockets/00073980e0e9f7a8
+    SOCKETS_PORT: 5080
+  script:
+    - ./deploy/launch-proxy.sh
+  only:
+    refs:
+      - master
