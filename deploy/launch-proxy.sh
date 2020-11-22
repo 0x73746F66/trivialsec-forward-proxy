@@ -4,7 +4,7 @@ if [[ $EUID -eq 0 ]]; then
    echo -e "This script must not be run as root" 
    exit 1
 fi
-if [[ ! -d scripts ]]; then
+if [[ ! -d deploy ]]; then
     echo -e "Run this from the project root directory"
     exit 0
 fi

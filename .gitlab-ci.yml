@@ -1,5 +1,4 @@
 before_script:
-  - echo 'COMMON_VERSION=0.1.4' > .env
   - aws --version
 
 stages:
@@ -12,7 +11,6 @@ upload:
     - python
   stage: upload
   variables:
-    COMMON_VERSION: 0.1.4
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
