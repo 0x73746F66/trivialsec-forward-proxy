@@ -9,6 +9,12 @@ if [[ ! -d deploy ]]; then
     exit 0
 fi
 
+mkdir -p ~/.ssh
+aws s3 cp --only-show-errors s3://cloudformation-trivialsec/deploy-keys/${PRIV_KEY_NAME}.pem ~/.ssh/${PRIV_KEY_NAME}.pem
+chmod 400 ~/.ssh/${PRIV_KEY_NAME}.pem
+eval $(ssh-agent -s)
+ssh-add ~/.ssh/${PRIV_KEY_NAME}.pem
+ssh-keyscan -H proxy.trivialsec.com >> ~/.ssh/known_hosts
 readonly existingInstanceId=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=Proxy" --instance-ids $(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query 'Reservations[].Instances[].InstanceId' --output text) --query 'Reservations[].Instances[].InstanceId' --output text)
 
 instanceId=$(aws ec2 run-instances \

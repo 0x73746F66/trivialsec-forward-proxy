@@ -13,14 +13,7 @@ rpm --quiet -U ./amazon-cloudwatch-agent.rpm || true
 rm -f ./amazon-cloudwatch-agent.rpm
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c ssm:AmazonCloudWatch-trivialsec-proxy
 
-mkdir -p /etc/squid/ssl /etc/squid/old/ ~/.ssh
-
-aws s3 cp --only-show-errors s3://cloudformation-trivialsec/deploy-keys/${PRIV_KEY_NAME}.pem ~/.ssh/${PRIV_KEY_NAME}.pem
-chmod 400 ~/.ssh/${PRIV_KEY_NAME}.pem
-eval $(ssh-agent -s)
-ssh-add ~/.ssh/${PRIV_KEY_NAME}.pem
-ssh-keyscan -H proxy.trivialsec.com >> ~/.ssh/known_hosts
-
+mkdir -p /etc/squid/ssl /etc/squid/old/
 cd /etc/squid/ssl
 openssl genrsa -out squid.key 4096
 openssl req -new -key squid.key -out squid.csr -subj "/C=XX/ST=XX/L=squid/O=squid/CN=squid"
