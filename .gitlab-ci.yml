@@ -33,7 +33,7 @@ deploy:
     EIP_ALLOCATION_ID: eipalloc-06df8c04f4ad62bfd
     ROUTE53_JSON: route53-resource-record-set.json
     DEFAULT_INSTANCE_TYPE: t2.micro
-    BASE_AMI: ami-0ded330691a314693
+    BASE_AMI: ami-09f765d333a8ebb4b
     SUBNET_ID: subnet-8b05e8c3
     SECURITY_GROUP_IDS: sg-0eb91604508f54628 sg-04a8dac724adcad3c
     IAM_INSTANCE_PROFILE: EC2-TrivialSec

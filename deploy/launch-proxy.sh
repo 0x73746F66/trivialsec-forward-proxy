@@ -9,12 +9,33 @@ if [[ ! -d deploy ]]; then
     exit 0
 fi
 
-mkdir -p ~/.ssh
-aws s3 cp --only-show-errors s3://cloudformation-trivialsec/deploy-keys/${PRIV_KEY_NAME}.pem ~/.ssh/${PRIV_KEY_NAME}.pem
-chmod 400 ~/.ssh/${PRIV_KEY_NAME}.pem
-eval $(ssh-agent -s)
-ssh-add ~/.ssh/${PRIV_KEY_NAME}.pem
-ssh-keyscan -H proxy.trivialsec.com >> ~/.ssh/known_hosts
+readonly proxy_host=proxy.trivialsec.com
+
+function setup_ssh() {
+    local ip_address=$1
+    mkdir -p ~/.ssh
+    ssh-keygen -R ${proxy_host}
+    aws s3 cp --only-show-errors s3://cloudformation-trivialsec/deploy-keys/${PRIV_KEY_NAME}.pem ~/.ssh/${PRIV_KEY_NAME}.pem
+    chmod 400 ~/.ssh/${PRIV_KEY_NAME}.pem
+    ssh-keyscan -H ${proxy_host} >> ~/.ssh/known_hosts
+    cat > ~/.ssh/config << EOF
+Host proxy
+  CheckHostIP no
+  StrictHostKeyChecking no
+  HostName ${proxy_host}
+  IdentityFile ~/.ssh/${PRIV_KEY_NAME}.pem
+  User ec2-user
+
+Host ec2
+  CheckHostIP no
+  StrictHostKeyChecking no
+  Hostname ${ip_address}
+  IdentityFile ~/.ssh/${PRIV_KEY_NAME}.pem
+  User ec2-user
+  ProxyCommand ssh -W %h:%p proxy
+
+EOF
+}
 readonly existingInstanceId=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=Proxy" --instance-ids $(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query 'Reservations[].Instances[].InstanceId' --output text) --query 'Reservations[].Instances[].InstanceId' --output text)
 
 instanceId=$(aws ec2 run-instances \
@@ -34,11 +55,12 @@ if [[ ${instanceId} == i-* ]]; then
     aws ec2 wait instance-running --instance-ids ${instanceId}
     aws ec2 wait instance-status-ok --instance-ids ${instanceId}
     privateIp=$(aws ec2 describe-instances --instance-ids ${instanceId} --query 'Reservations[].Instances[].PrivateIpAddress' --output text)
-    while ! [ $(ssh -o 'StrictHostKeyChecking no' -4 -J ec2-user@proxy.trivialsec.com ec2-user@${privateIp} 'echo `[ -f .deployed ]` $?') -eq 0 ]
+    setup_ssh ${privateIp}
+    while ! [ $(ssh -4 ec2 'echo `[ -f .deployed ]` $?' || echo 1) -eq 0 ]
     do
         sleep 2
     done
-    scp -o 'StrictHostKeyChecking no' -4 -J ec2-user@proxy.trivialsec.com ec2-user@${privateIp}:/var/log/user-data.log .
+    scp -4 ec2:/var/log/user-data.log .
     cat user-data.log
     if [[ ! -z "${existingInstanceId}" ]] && [[ ${existingInstanceId} == i-* ]]; then
         aws ec2 terminate-instances --instance-ids ${existingInstanceId}
