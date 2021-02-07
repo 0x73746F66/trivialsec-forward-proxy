@@ -22,8 +22,8 @@ openssl req -new -key squid.key -out squid.csr -subj "/C=XX/ST=XX/L=squid/O=squi
 openssl x509 -req -days 3650 -in squid.csr -signkey squid.key -out squid.crt
 cat squid.key squid.crt >> squid.pem
 cp -Pfr /etc/squid/* /tmp/squid_old/
-aws s3 cp --only-show-errors s3://cloudformation-trivialsec/deploy-packages/allowed-sites.txt /etc/squid/allowed-sites.txt
-aws s3 cp --only-show-errors s3://cloudformation-trivialsec/deploy-packages/squid.conf /etc/squid/squid.conf
+aws s3 cp --only-show-errors s3://trivialsec-assets/deploy-packages/allowed-sites.txt /etc/squid/allowed-sites.txt
+aws s3 cp --only-show-errors s3://trivialsec-assets/deploy-packages/squid.conf /etc/squid/squid.conf
 iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3129
 iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 3130
 squid -k parse && squid -k reconfigure || (cp -Pfr /tmp/squid_old/* /etc/squid/; exit 1)
