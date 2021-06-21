@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 -include .env
 export $(shell sed 's/=.*//' .env)
-
+.ONESHELL: # Applies to every targets in the file!
 .PHONY: help
 
 help: ## This help.
@@ -18,5 +18,5 @@ CMD_AWS += --region $(AWS_REGION)
 endif
 
 upload:
-	$(CMD_AWS) s3 cp --only-show-errors allowed-sites.txt s3://trivialsec-assets/deploy-packages/allowed-sites.txt
-	$(CMD_AWS) s3 cp --only-show-errors squid.conf s3://trivialsec-assets/deploy-packages/squid.conf
+	$(CMD_AWS) --profile trivialsec s3 cp --only-show-errors allowed-sites.txt s3://static-trivialsec/deploy-packages/allowed-sites.txt
+	$(CMD_AWS) --profile trivialsec s3 cp --only-show-errors squid.conf s3://static-trivialsec/deploy-packages/squid.conf
