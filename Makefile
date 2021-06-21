@@ -20,3 +20,13 @@ endif
 upload:
 	$(CMD_AWS) --profile trivialsec s3 cp --only-show-errors allowed-sites.txt s3://static-trivialsec/deploy-packages/allowed-sites.txt
 	$(CMD_AWS) --profile trivialsec s3 cp --only-show-errors squid.conf s3://static-trivialsec/deploy-packages/squid.conf
+
+plan:
+	cd plans
+	terraform init -upgrade=true
+	terraform validate
+	terraform plan -no-color -out=.tfplan
+
+apply:
+	cd plans
+	terraform apply -auto-approve -refresh=true .tfplan
