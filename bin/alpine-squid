@@ -1,0 +1,77 @@
+#!/bin/sh
+# <UDF name="AWS_ACCESS_KEY_ID" Label="AWS API Key ID" />
+# <UDF name="AWS_SECRET_ACCESS_KEY" Label="AWS Secret Access Key" />
+# <UDF name="AWS_DEFAULT_REGION" Label="AWS Default Region" default="ap-southeast-2" />
+set -ex
+exec >/root/stackscript.log 2>&1
+echo 'export PATH="$PATH:/root/.local/bin"' >> ~/.bashrc
+export PATH="$PATH:/root/.local/bin"
+
+function setup_os() {
+    apk update
+    apk add --update ca-certificates squid openssl py-pip iptables lsof
+    pip install -U pip
+    pip install pipx
+}
+function setup_aws() {
+    pipx install awscli
+    # Test AWS Credentials stored in Env vars
+    aws sts get-caller-identity
+}
+function prepare_folders() {
+	echo "Preparing folders..."
+	mkdir -p /etc/squid-cert /var/cache/squid /var/log/squid /etc/squid/ssl /tmp/squid_old
+    touch /etc/squid/passwd
+	chown -R squid:squid /etc/squid-cert /var/cache/squid /var/log/squid /etc/squid/passwd
+}
+function create_cert() {
+	if [ ! -f /etc/squid-cert/private.pem ]; then
+		echo "Creating /etc/squid-cert/private.pem"
+		openssl req -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 \
+			-extensions v3_ca -keyout /etc/squid-cert/private.pem \
+			-out /etc/squid-cert/private.pem \
+			-subj "/CN=proxy.trivialsec.com/O=squid/OU=squid/C=AU" -utf8 -nameopt multiline,utf8
+
+		openssl x509 -in /etc/squid-cert/private.pem \
+			-outform DER -out /etc/squid-cert/CA.der
+
+		openssl x509 -inform DER -in /etc/squid-cert/CA.der \
+			-out /etc/squid-cert/CA.pem
+        
+        cp -Pfr /etc/squid/* /tmp/squid_old/
+	else
+		echo "/etc/squid-cert/private.pem found..."
+	fi
+}
+function download_sources() {
+    aws s3 cp --only-show-errors s3://static-trivialsec/deploy-packages/allowed-sites.txt /etc/squid/allowed-sites.txt
+    aws s3 cp --only-show-errors s3://static-trivialsec/deploy-packages/squid.conf /etc/squid/squid.conf
+}
+function configure_ports() {
+    iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3129
+    iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port 3129
+}
+prepare_folders
+setup_os
+configure_ports
+create_cert
+update-ca-certificates --fresh
+setup_aws
+download_sources
+squid -k parse
+rc-service squid start
+rc-update add squid default
+# live changes; Run:
+# squid -k parse && squid -k reconfigure || (cp -Pfr /tmp/squid_old/* /etc/squid/; exit 1)
+
+# Bugfix: Squid crashes after configuring HTTPS interception https://wiki.alpinelinux.org/wiki/Setting_up_Explicit_Squid_Proxy
+lsof -i :3128 || (
+    rc-service squid stop
+    rm -rfv /var/lib/ssl_db /var/cache/squid/ssl_db
+    /usr/lib/squid3/ssl_crtd -c -s /var/lib/ssl_db 
+    chown -R squid:squid /var/lib/ssl_db
+    rc-service squid start
+)
+# cleanup
+rm -rf /tmp/* /var/cache/apk/*
+echo $(date +'%F') > /root/.deployed

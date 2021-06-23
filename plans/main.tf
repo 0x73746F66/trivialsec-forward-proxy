@@ -17,3 +17,9 @@ provider "linode" {
     token = var.linode_token
 }
 
+provider "aws" {
+    region              = local.aws_default_region
+    secret_key          = var.aws_secret_access_key
+    access_key          = var.aws_access_key_id
+    allowed_account_ids = [local.aws_master_account_id]
+}

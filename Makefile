@@ -18,8 +18,8 @@ CMD_AWS += --region $(AWS_REGION)
 endif
 
 upload:
-	$(CMD_AWS) --profile trivialsec s3 cp --only-show-errors allowed-sites.txt s3://static-trivialsec/deploy-packages/allowed-sites.txt
-	$(CMD_AWS) --profile trivialsec s3 cp --only-show-errors squid.conf s3://static-trivialsec/deploy-packages/squid.conf
+	$(CMD_AWS) --profile trivialsec s3 cp --only-show-errors conf/allowed-sites.txt s3://static-trivialsec/deploy-packages/allowed-sites.txt
+	$(CMD_AWS) --profile trivialsec s3 cp --only-show-errors conf/squid.conf s3://static-trivialsec/deploy-packages/squid.conf
 
 plan:
 	cd plans
