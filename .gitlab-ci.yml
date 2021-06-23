@@ -27,7 +27,7 @@ tfplan:
       - merge_request
       - master
 
-upload:
+s3upload:
   retry: 2
   tags:
     - python

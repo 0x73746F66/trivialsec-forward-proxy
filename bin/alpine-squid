@@ -27,10 +27,13 @@ function prepare_folders() {
 function create_cert() {
 	if [ ! -f /etc/squid/ssl/squid.pem ]; then
 		echo "Creating /etc/squid/ssl/squid.pem"
-		openssl req -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 \
-			-extensions v3_ca -keyout /etc/squid/ssl/squid.pem \
+		openssl req -new -newkey rsa:4096 -sha256 -days 3650 -nodes -x509 \
+            -extensions SAN \
+			-extensions v3_ca \
+            -keyout /etc/squid/ssl/squid.pem \
 			-out /etc/squid/ssl/squid.pem \
-			-subj "/CN=proxy.trivialsec.com/O=squid/OU=squid/C=AU" -utf8 -nameopt multiline,utf8
+            -addext "subjectAltName = DNS:proxy.trivialsec.com" \
+			-subj "CN=proxy.trivialsec.com/C=AU/O=Trivial Security" -utf8 -nameopt multiline,utf8
 
 		openssl x509 -in /etc/squid/ssl/squid.pem \
 			-outform DER -out /etc/squid/ssl/CA.der
@@ -67,11 +70,12 @@ rc-update add squid default
 # Bugfix: Squid crashes after configuring HTTPS interception https://wiki.alpinelinux.org/wiki/Setting_up_Explicit_Squid_Proxy
 lsof -i :3128 || (
     rc-service squid stop
-    rm -rfv /var/lib/ssl_db /var/cache/squid/ssl_db
-    /usr/lib/squid/ssl_crtd -c -s /var/lib/ssl_db
-    chown -R squid:squid /var/lib/ssl_db
+    rm -rfv /var/cache/squid/ssl_db
+    /usr/lib/squid/security_file_certgen -c -s /var/cache/squid/ssl_db -M 4MB
+    chown -R squid:squid /var/cache/squid/ssl_db
     rc-service squid start
 )
+netstat -ltn
 # cleanup
 rm -rf /tmp/* /var/cache/apk/*
 echo $(date +'%F') > /root/.deployed
