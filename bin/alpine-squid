@@ -68,7 +68,7 @@ rc-update add squid default
 lsof -i :3128 || (
     rc-service squid stop
     rm -rfv /var/lib/ssl_db /var/cache/squid/ssl_db
-    /usr/lib/squid3/ssl_crtd -c -s /var/lib/ssl_db 
+    /usr/lib/squid/ssl_crtd -c -s /var/lib/ssl_db
     chown -R squid:squid /var/lib/ssl_db
     rc-service squid start
 )
