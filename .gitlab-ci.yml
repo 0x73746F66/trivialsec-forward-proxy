@@ -1,5 +1,7 @@
 variables:
   TF_VAR_linode_token: $TF_VAR_linode_token
+  TF_VAR_aws_access_key_id: $TF_VAR_aws_access_key_id
+  TF_VAR_aws_secret_access_key: $TF_VAR_aws_secret_access_key
   AWS_ACCESS_KEY_ID: $TF_VAR_aws_access_key_id
   AWS_SECRET_ACCESS_KEY: $TF_VAR_aws_secret_access_key
   AWS_DEFAULT_REGION: ap-southeast-2

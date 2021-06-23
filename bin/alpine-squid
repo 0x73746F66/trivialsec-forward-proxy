@@ -33,7 +33,7 @@ function create_cert() {
             -keyout /etc/squid/ssl/squid.pem \
 			-out /etc/squid/ssl/squid.pem \
             -addext "subjectAltName = DNS:proxy.trivialsec.com" \
-			-subj "CN=proxy.trivialsec.com/C=AU/O=Trivial Security" -utf8 -nameopt multiline,utf8
+			-subj "/CN=proxy.trivialsec.com/C=AU/O=Trivial Security" -utf8 -nameopt multiline,utf8
 
 		openssl x509 -in /etc/squid/ssl/squid.pem \
 			-outform DER -out /etc/squid/ssl/CA.der
