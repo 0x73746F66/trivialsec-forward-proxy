@@ -20,27 +20,27 @@ function setup_aws() {
 }
 function prepare_folders() {
 	echo "Preparing folders..."
-	mkdir -p /etc/squid-cert /var/cache/squid /var/log/squid /etc/squid/ssl /tmp/squid_old
+	mkdir -p /var/cache/squid /var/log/squid /etc/squid/ssl /tmp/squid_old
     touch /etc/squid/passwd
-	chown -R squid:squid /etc/squid-cert /var/cache/squid /var/log/squid /etc/squid/passwd
+	chown -R squid:squid /var/cache/squid /var/log/squid /etc/squid/passwd
 }
 function create_cert() {
-	if [ ! -f /etc/squid-cert/private.pem ]; then
-		echo "Creating /etc/squid-cert/private.pem"
+	if [ ! -f /etc/squid/ssl/squid.pem ]; then
+		echo "Creating /etc/squid/ssl/squid.pem"
 		openssl req -new -newkey rsa:2048 -sha256 -days 3650 -nodes -x509 \
-			-extensions v3_ca -keyout /etc/squid-cert/private.pem \
-			-out /etc/squid-cert/private.pem \
+			-extensions v3_ca -keyout /etc/squid/ssl/squid.pem \
+			-out /etc/squid/ssl/squid.pem \
 			-subj "/CN=proxy.trivialsec.com/O=squid/OU=squid/C=AU" -utf8 -nameopt multiline,utf8
 
-		openssl x509 -in /etc/squid-cert/private.pem \
-			-outform DER -out /etc/squid-cert/CA.der
+		openssl x509 -in /etc/squid/ssl/squid.pem \
+			-outform DER -out /etc/squid/ssl/CA.der
 
-		openssl x509 -inform DER -in /etc/squid-cert/CA.der \
-			-out /etc/squid-cert/CA.pem
+		openssl x509 -inform DER -in /etc/squid/ssl/CA.der \
+			-out /etc/squid/ssl/CA.pem
         
         cp -Pfr /etc/squid/* /tmp/squid_old/
 	else
-		echo "/etc/squid-cert/private.pem found..."
+		echo "/etc/squid/ssl/squid.pem found..."
 	fi
 }
 function download_sources() {
