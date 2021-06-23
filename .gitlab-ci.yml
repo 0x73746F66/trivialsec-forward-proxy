@@ -10,7 +10,7 @@ before_script:
 stages:
   - plan
   - upload
-  - deploy
+  - apply
 
 tfplan:
   retry: 2
