@@ -23,6 +23,7 @@ upload:
 
 plan:
 	cd plans
+	terraform init
 	terraform init -upgrade=true
 	terraform validate
 	terraform plan -no-color -out=.tfplan
