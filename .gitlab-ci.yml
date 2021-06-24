@@ -26,6 +26,12 @@ tfplan:
     refs:
       - merge_request
       - master
+  artifacts:
+    name: tfplan
+    paths:
+      - plans/.tfplan
+    reports:
+      terraform: plans/plan.json
 
 s3upload:
   retry: 2
@@ -48,3 +54,9 @@ tfapply:
   only:
     refs:
       - master
+  environment:
+    name: linode
+    url: https://cloud.linode.com/search/?query=label:forward-proxy
+  dependencies:
+    - tfplan
+  when: manual
