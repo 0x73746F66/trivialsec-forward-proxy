@@ -28,7 +28,7 @@ tfplan:
     paths:
       - plans/.tfplan
     reports:
-      terraform: plans/plan.json
+      terraform: plans/tfplan.json
 
 s3upload:
   retry: 2
@@ -72,3 +72,9 @@ tfdestroy:
   environment:
     name: linode
     action: stop
+  artifacts:
+    name: tfdestroy
+    paths:
+      - plans/.tfdestroy
+    reports:
+      terraform: plans/tfdestroy.json
