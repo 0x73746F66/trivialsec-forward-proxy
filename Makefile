@@ -15,9 +15,7 @@ upload: ## Send squid.conf and allowed-sites.txt to S3
 
 plan: ## Runs tf init tf validate and tf plan
 	cd plans
-	terraform init -var "aws_profile="
-	@echo "Updating providers"
-	@terraform init -var "aws_profile=" -upgrade=true >/dev/null
+	terraform init -reconfigure -upgrade=true
 	terraform validate
 	terraform plan -no-color -out=.tfplan
 	terraform show --json .tfplan | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > plan.json
