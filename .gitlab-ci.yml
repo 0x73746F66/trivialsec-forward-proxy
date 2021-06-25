@@ -22,7 +22,7 @@ tfplan:
   only:
     refs:
       - merge_request
-      - master
+      - main
   artifacts:
     name: tfplan
     paths:
@@ -39,7 +39,7 @@ s3upload:
     - make upload
   only:
     refs:
-      - master
+      - main
 
 tfapply:
   retry: 2
@@ -50,7 +50,7 @@ tfapply:
     - make apply
   only:
     refs:
-      - master
+      - main
   environment:
     name: linode
     url: https://cloud.linode.com/search/?query=label:forward-proxy
