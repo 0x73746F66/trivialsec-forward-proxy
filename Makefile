@@ -18,7 +18,11 @@ else
 	aws s3 cp --only-show-errors conf/squid.conf s3://static-trivialsec/deploy-packages/squid.conf
 endif
 
-plan: ## Runs tf init tf validate and tf plan
+init:  ## Runs tf init tf
+	cd plans
+	terraform init -reconfigure -upgrade=true
+
+plan: init ## Runs tf validate and tf plan
 	cd plans
 	terraform init -reconfigure -upgrade=true
 	terraform validate
@@ -31,3 +35,10 @@ apply: plan ## tf apply -auto-approve -refresh=true
 
 tail-access: ## tail the squid access log in prod
 	ssh root@proxy.trivialsec.com tail -f /var/log/squid/access.log
+
+destroy: init
+	cd plans
+	terraform validate
+	terraform plan -no-color -out=.tfdestroy
+	terraform show --json .tfdestroy | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > destroy.json
+	terraform apply -auto-approve -destroy .tfdestroy
