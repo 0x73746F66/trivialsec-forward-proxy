@@ -72,8 +72,11 @@ venv.bak/
 # IDE
 .vscode
 .idea
-.terraform/
-terraform.*
+**/.terraform/
+**/.terraform*
+**/.tfplan
+**/terraform.*
+plan.json
 
 # sensitive
 **/*.db
