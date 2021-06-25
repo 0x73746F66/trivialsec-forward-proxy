@@ -39,6 +39,6 @@ tail-access: ## tail the squid access log in prod
 destroy: init
 	cd plans
 	terraform validate
-	terraform plan -no-color -out=.tfdestroy
+	terraform plan -destroy -no-color -out=.tfdestroy
 	terraform show --json .tfdestroy | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > destroy.json
 	terraform apply -auto-approve -destroy .tfdestroy
