@@ -54,6 +54,21 @@ tfapply:
   environment:
     name: linode
     url: https://cloud.linode.com/search/?query=label:forward-proxy
+    on_stop: tfdestroy
   dependencies:
     - tfplan
   when: manual
+
+tfdestroy:
+  retry: 2
+  stage: apply
+  variables:
+    GIT_STRATEGY: none
+  tags:
+    - python
+  script:
+    - make destroy
+  when: manual
+  environment:
+    name: linode
+    action: stop
