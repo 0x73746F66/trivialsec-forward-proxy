@@ -74,9 +74,9 @@ venv.bak/
 .idea
 **/.terraform/
 **/.terraform*
-**/.tfplan
+**/.tf*
 **/terraform.*
-plan.json
+tf*.json
 
 # sensitive
 **/*.db
