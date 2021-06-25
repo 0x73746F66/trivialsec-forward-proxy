@@ -25,7 +25,7 @@ plan: ## Runs tf init tf validate and tf plan
 	terraform plan -no-color -out=.tfplan
 	terraform show --json .tfplan | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > plan.json
 
-apply: ## tf apply -auto-approve -refresh=true
+apply: plan ## tf apply -auto-approve -refresh=true
 	cd plans
 	terraform apply -auto-approve -refresh=true .tfplan
 
