@@ -1,8 +1,2 @@
 #!/usr/bin/env bash
-unset AWS_DEFAULT_REGION
-unset AWS_REGION
-unset AWS_ACCOUNT
-unset TF_VAR_linode_token
-unset TF_VAR_aws_access_key_id
-unset TF_VAR_aws_secret_access_key
 reset

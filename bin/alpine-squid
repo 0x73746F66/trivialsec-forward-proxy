@@ -1,14 +1,15 @@
 #!/bin/sh
 # <UDF name="AWS_ACCESS_KEY_ID" Label="AWS API Key ID" />
 # <UDF name="AWS_SECRET_ACCESS_KEY" Label="AWS Secret Access Key" />
-# <UDF name="AWS_DEFAULT_REGION" Label="AWS Default Region" default="ap-southeast-2" />
+# <UDF name="AWS_REGION" Label="AWS Region" default="ap-southeast-2" />
 set -ex
 exec >/root/stackscript.log 2>&1
 echo 'export PATH="$PATH:/root/.local/bin"' >> ~/.bashrc
 export PATH="$PATH:/root/.local/bin"
 
 function setup_os() {
-    apk update
+    echo "Patching..."
+    apk upgrade --update-cache --available
     apk add --update ca-certificates squid openssl py-pip iptables lsof
     pip install -U pip
     pip install pipx
@@ -47,8 +48,8 @@ function create_cert() {
 	fi
 }
 function download_sources() {
-    aws s3 cp --only-show-errors s3://static-trivialsec/deploy-packages/allowed-sites.txt /etc/squid/allowed-sites.txt
-    aws s3 cp --only-show-errors s3://static-trivialsec/deploy-packages/squid.conf /etc/squid/squid.conf
+    aws s3 cp --only-show-errors s3://tfplans-trivialsec/deploy-packages/allowed-sites.txt /etc/squid/allowed-sites.txt
+    aws s3 cp --only-show-errors s3://tfplans-trivialsec/deploy-packages/squid.conf /etc/squid/squid.conf
 }
 function configure_ports() {
     iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3129

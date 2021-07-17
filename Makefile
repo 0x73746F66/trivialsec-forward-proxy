@@ -11,11 +11,11 @@ help: ## This help.
 
 upload: ## Send squid.conf and allowed-sites.txt to S3
 ifdef AWS_PROFILE
-	aws --profile $(AWS_PROFILE) s3 cp --only-show-errors conf/allowed-sites.txt s3://static-trivialsec/deploy-packages/allowed-sites.txt
-	aws --profile $(AWS_PROFILE) s3 cp --only-show-errors conf/squid.conf s3://static-trivialsec/deploy-packages/squid.conf
+	aws --profile $(AWS_PROFILE) s3 cp --only-show-errors conf/allowed-sites.txt s3://tfplans-trivialsec/deploy-packages/allowed-sites.txt
+	aws --profile $(AWS_PROFILE) s3 cp --only-show-errors conf/squid.conf s3://tfplans-trivialsec/deploy-packages/squid.conf
 else
-	aws s3 cp --only-show-errors conf/allowed-sites.txt s3://static-trivialsec/deploy-packages/allowed-sites.txt
-	aws s3 cp --only-show-errors conf/squid.conf s3://static-trivialsec/deploy-packages/squid.conf
+	aws s3 cp --only-show-errors conf/allowed-sites.txt s3://tfplans-trivialsec/deploy-packages/allowed-sites.txt
+	aws s3 cp --only-show-errors conf/squid.conf s3://tfplans-trivialsec/deploy-packages/squid.conf
 endif
 
 tfinstall:
@@ -41,6 +41,8 @@ apply: plan ## tf apply -auto-approve -refresh=true
 	terraform apply -auto-approve -refresh=true .tfplan
 
 tail-access: ## tail the squid access log in prod
+	@$(shell ssh-keygen -R "proxy.trivialsec.com")
+	@$(shell ssh-keyscan -H "proxy.trivialsec.com" >> ~/.ssh/known_hosts)
 	ssh root@proxy.trivialsec.com tail -f /var/log/squid/access.log
 
 destroy: init ## tf destroy -auto-approve
