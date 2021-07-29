@@ -53,7 +53,7 @@ destroy: init ## tf destroy -auto-approve
 	terraform apply -auto-approve -destroy .tfdestroy
 
 attach-firewall:
-	LINODE_ID=$(curl -s -H "Authorization: Bearer ${TF_VAR_linode_token}" https://api.linode.com/v4/linode/instances | jq -r '.data[] | select(.label=="forward-proxy") | .id')
+	LINODE_ID=$(shell curl -s -H "Authorization: Bearer ${TF_VAR_linode_token}" https://api.linode.com/v4/linode/instances | jq -r '.data[] | select(.label=="forward-proxy") | .id')
 	curl -s -H "Content-Type: application/json" \
 		-H "Authorization: Bearer ${TF_VAR_linode_token}" \
 		-X POST -d '{"type": "linode", "id": ${LINODE_ID}}' \
