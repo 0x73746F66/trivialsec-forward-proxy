@@ -23,7 +23,7 @@ tf:plan:
       - merge_request
       - main
   artifacts:
-    name: tfplan
+    name: "tf:plan"
     paths:
       - plans/.tfplan
     reports:
@@ -51,9 +51,9 @@ tf:apply:
   environment:
     name: linode
     url: https://cloud.linode.com/search/?query=label:forward-proxy
-    on_stop: tfdestroy
+    on_stop: "tf:destroy"
   dependencies:
-    - tfplan
+    - "tf:plan"
   when: manual
 
 
@@ -80,7 +80,7 @@ tf:destroy:
     name: linode
     action: stop
   artifacts:
-    name: tfdestroy
+    name: "tf:destroy"
     paths:
       - plans/.tfdestroy
     reports:
