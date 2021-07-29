@@ -51,3 +51,10 @@ destroy: init ## tf destroy -auto-approve
 	terraform plan -destroy -no-color -out=.tfdestroy
 	terraform show --json .tfdestroy | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > tfdestroy.json
 	terraform apply -auto-approve -destroy .tfdestroy
+
+attach-firewall:
+	LINODE_ID=$(curl -s -H "Authorization: Bearer ${TF_VAR_linode_token}" https://api.linode.com/v4/linode/instances | jq -r '.data[] | select(.label=="forward-proxy") | .id')
+	curl -s -H "Content-Type: application/json" \
+		-H "Authorization: Bearer ${TF_VAR_linode_token}" \
+		-X POST -d '{"type": "linode", "id": ${LINODE_ID}}' \
+		https://api.linode.com/v4/networking/firewalls/${LINODE_FIREWALL}/devices

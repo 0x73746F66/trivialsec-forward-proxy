@@ -1,21 +1,21 @@
 variables:
   AWS_REGION: ap-southeast-2
   AWS_ACCOUNT: 814504268053
+  LINODE_FIREWALL: 13219
 
 before_script:
   - terraform --version
   - aws --version
 
 stages:
-  - plan
-  - upload
-  - apply
+  - build
+  - deploy
+  - firewall
 
-tfplan:
-  retry: 2
+tf:plan:
   tags:
-    - python
-  stage: plan
+    - linode
+  stage: build
   script:
     - make plan
   only:
@@ -29,22 +29,20 @@ tfplan:
     reports:
       terraform: plans/tfplan.json
 
-s3upload:
-  retry: 2
+s3:upload:
   tags:
-    - python
-  stage: upload
+    - linode
+  stage: build
   script:
     - make upload
   only:
     refs:
       - main
 
-tfapply:
-  retry: 2
+tf:apply:
   tags:
-    - python
-  stage: apply
+    - linode
+  stage: deploy
   script:
     - make apply
   only:
@@ -58,13 +56,23 @@ tfapply:
     - tfplan
   when: manual
 
-tfdestroy:
-  retry: 2
-  stage: apply
+
+firewall:attach:
+  stage: firewall
+  tags:
+    - linode
+  only:
+    refs:
+      - main
+  script:
+    - make attach-firewall
+
+tf:destroy:
+  stage: deploy
   variables:
     GIT_STRATEGY: none
   tags:
-    - python
+    - linode
   script:
     - make destroy
   when: manual
