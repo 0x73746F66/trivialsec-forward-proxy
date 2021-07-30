@@ -1,9 +1,25 @@
 #!/bin/sh
+# <UDF name="HOSTNAME" label="The hostname for the new Linode." default="proxy.trivialsec.com" />
 # <UDF name="AWS_ACCESS_KEY_ID" Label="AWS API Key ID" />
 # <UDF name="AWS_SECRET_ACCESS_KEY" Label="AWS Secret Access Key" />
 # <UDF name="AWS_REGION" Label="AWS Region" default="ap-southeast-2" />
 set -ex
-exec >/root/stackscript.log 2>&1
+exec >  >(tee -a /root/stackscript.log)
+exec 2> >(tee -a /root/stackscript.log >&2)
+echo "Linode Variable Values:  LINODE_ID: $LINODE_ID,  LINODE_LISHUSERNAME: $LINODE_LISHUSERNAME,  LINODE_RAM: $LINODE_RAM,  LINODE_DATACENTERID:$LINODE_DATACENTERID"
+# Kernel Tune
+echo 1 > /proc/sys/vm/swappiness
+# Create SWAP File as 
+fallocate -l $LINODE_RAM\M /swapfile
+let BLOCK_COUNT=$LINODE_RAM*1024
+dd if=/dev/zero of=/swapfile bs=1024 count=$BLOCK_COUNT
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+# This section sets the hostname.
+echo $HOSTNAME > /etc/hostname
+hostname -F /etc/hostname
+
 echo 'export PATH="$PATH:/root/.local/bin"' >> ~/.bashrc
 export PATH="$PATH:/root/.local/bin"
 
@@ -80,3 +96,4 @@ netstat -ltn
 # cleanup
 rm -rf /tmp/* /var/cache/apk/*
 echo $(date +'%F') > /root/.deployed
+echo Stackscript Finished!
