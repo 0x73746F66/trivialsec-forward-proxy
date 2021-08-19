@@ -11,11 +11,11 @@ help: ## This help.
 
 upload: ## Send squid.conf and allowed-sites.txt to S3
 ifdef AWS_PROFILE
-	aws --profile $(AWS_PROFILE) s3 cp --only-show-errors conf/allowed-sites.txt s3://tfplans-trivialsec/deploy-packages/allowed-sites.txt
-	aws --profile $(AWS_PROFILE) s3 cp --only-show-errors conf/squid.conf s3://tfplans-trivialsec/deploy-packages/squid.conf
+	aws --profile $(AWS_PROFILE) s3 cp --only-show-errors conf/allowed-sites.txt s3://stateful-trivialsec/deploy-packages/allowed-sites.txt
+	aws --profile $(AWS_PROFILE) s3 cp --only-show-errors conf/squid.conf s3://stateful-trivialsec/deploy-packages/squid.conf
 else
-	aws s3 cp --only-show-errors conf/allowed-sites.txt s3://tfplans-trivialsec/deploy-packages/allowed-sites.txt
-	aws s3 cp --only-show-errors conf/squid.conf s3://tfplans-trivialsec/deploy-packages/squid.conf
+	aws s3 cp --only-show-errors conf/allowed-sites.txt s3://stateful-trivialsec/deploy-packages/allowed-sites.txt
+	aws s3 cp --only-show-errors conf/squid.conf s3://stateful-trivialsec/deploy-packages/squid.conf
 endif
 
 tfinstall:

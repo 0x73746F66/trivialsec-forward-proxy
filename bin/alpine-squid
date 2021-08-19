@@ -64,8 +64,8 @@ function create_cert() {
 	fi
 }
 function download_sources() {
-    aws s3 cp --only-show-errors s3://tfplans-trivialsec/deploy-packages/allowed-sites.txt /etc/squid/allowed-sites.txt
-    aws s3 cp --only-show-errors s3://tfplans-trivialsec/deploy-packages/squid.conf /etc/squid/squid.conf
+    aws s3 cp --only-show-errors s3://stateful-trivialsec/deploy-packages/allowed-sites.txt /etc/squid/allowed-sites.txt
+    aws s3 cp --only-show-errors s3://stateful-trivialsec/deploy-packages/squid.conf /etc/squid/squid.conf
 }
 function configure_ports() {
     iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3129

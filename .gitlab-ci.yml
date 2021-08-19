@@ -1,6 +1,6 @@
 variables:
   AWS_REGION: ap-southeast-2
-  AWS_ACCOUNT: 814504268053
+  AWS_ACCOUNT: 984310022655
   LINODE_FIREWALL: 13219
 
 before_script:

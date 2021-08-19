@@ -20,7 +20,7 @@ terraform {
         }
     }
     backend "s3" {
-        bucket = "tfplans-trivialsec"
+        bucket = "stateful-trivialsec"
         key    = "terraform/statefiles/forward-proxy"
         region  = "ap-southeast-2"
     }
