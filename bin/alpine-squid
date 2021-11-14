@@ -92,7 +92,7 @@ lsof -i :3128 || (
     chown -R squid:squid /var/cache/squid/ssl_db
     rc-service squid start
 )
-netstat -ltn
+netstat -tulpn
 # cleanup
 rm -rf /tmp/* /var/cache/apk/*
 echo $(date +'%F') > /root/.deployed

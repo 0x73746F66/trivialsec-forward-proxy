@@ -15,7 +15,7 @@ resource "linode_stackscript" "squid" {
 resource "linode_instance" "forward_proxy" {
   label             = "forward-proxy"
   group             = "SaaS"
-  tags              = ["SaaS"]
+  tags              = ["Network", "Security", "Shared"]
   region            = local.linode_default_region
   type              = local.linode_default_type
   image             = local.linode_default_image
